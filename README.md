@@ -202,6 +202,8 @@ db.listings.find().limit(10).pretty()
 
 3. choose two hosts (by reffering to their `host_id` values) who are superhosts (available in the `host_is_superhost` field), and show all of the listings offered by both of the two hosts
    - only show the `name`, `price`, `neighbourhood`, `host_name`, and `host_is_superhost` for each result
+
+I first search for the first two superhost.
 ```
 db.listings.find({ "host_is_superhost": "t" }, { "host_id": 1 }).limit(2)
 ```
@@ -211,6 +213,7 @@ db.listings.find({ "host_is_superhost": "t" }, { "host_id": 1 }).limit(2)
   { _id: ObjectId('660e0bf4b6515eb2057989a3'), host_id: 230265204 }
 ]
 ```
+After locating their host_id, I search for their listings.
 ```
 db.listings.find({host_is_superhost:"t", "host_id": { $in: [3793516, 230265204] }},{"name": 1, "price": 1, "neighbourhood": 1, "host_name": 1, "host_is_superhost": 1, "_id": 0})
 ```
@@ -301,6 +304,8 @@ db.listings.distinct("host_name")
    - only show the `name`, `beds`, `review_scores_rating`, and `price`
    - if your data set only has blanks for all the neighborhood-related fields, or only one neighborhood value in all documents, you may pick another field to filter by - include an explanation and justification for this in your report.
    - if you run out of memory for this query, try filtering `review_scores_rating` that aren't empty (`$ne`); and lastly, if there's still an issue, you can set the `beds` to match exactly 2.
+
+I first try to see how many neighborhood are there inside the data.
 ```
 db.listings.distinct("neighbourhood")
 ```
@@ -313,12 +318,14 @@ db.listings.distinct("neighbourhood")
   'san francisco, California, United States'
 ]
 ```
+I choose San Francisco, California, United States as the neigborhood to test out.
 ```
 db.listings.countDocuments({neighbourhood:"San Francisco, California, United States"})
 ```
 ```
 4502
 ```
+I search for airbnbs that have more than 2 beds within this neighborhood.
 ```
 db.listings.find({neighbourhood:"San Francisco, California, United States",beds:{$gt:2}},{_id:0,name:1,beds:1,review_scores_rating:1,price:1}).sort({review_scores_rating:-1})
 ```
@@ -478,7 +485,8 @@ Type "it" for more
 ```
 7. find the average `review_scores_rating` per neighborhood, and only show those that are `4` or above, sorted in descending order of rating (see [the docs](https://docs.mongodb.com/manual/reference/operator/aggregation/sort/))
    - if your data set only has blanks in the neighborhood-related fields, or only one neighborhood value in all documents, you may pick another field to break down the listings by - include an explanation and justification for this in your report.
-- use bed count because there is only one big neighbourhood in SF.
+
+I search for the number of listings within each neighborhood.
 ```
 jw6441> db.listings.countDocuments({})
 6198
@@ -492,8 +500,8 @@ jw6441> db.listings.countDocuments({neighbourhood:"San Francisco, Hayes Valley, 
 1
 jw6441> db.listings.countDocuments({neighbourhood:""})
 1693
-
 ```
+Thus, I used bed count instead because there is only one big neighbourhood in SF.
 ```
 db.listings.aggregate([
   {
@@ -535,6 +543,6 @@ db.listings.aggregate([
   { _id: 1, averageRating: 4.69306309751434 }
 ]
 ```
+We can see that the more beds there are in an AirBnB, the more likely it is going to have a higher rating. This is probably due to the fact that more beds means a bigger house and probably also a better quality. 
 
-We can see that the more beds in an AirBnB, the more likely it is going to have a higher rating. This is probably due to the fact that more beds means a bigger house and probably also have a better quality. 
-AirBnB with one bed have the lower ratings, probably due to the limited space of the room and it's possible that people have to share a common space with other consumers for those rooms. 
+AirBnB with one bed have the lower ratings, probably due to the limited space of the room and it's possible that people have to share a common space with other people for those rooms. 
